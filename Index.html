@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    /* Estilos para limitar el texto dentro de la card */
+    .card-text {
+      max-height: 4em; /* Mostrar solo 2 líneas de texto */
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: max-height 0.3s ease;
+    }
+
+    .card-text.expanded {
+      max-height: none; /* Permitir expandir la altura */
+    }
+
+    .show-more {
+      cursor: pointer;
+      color: #007bff;
+      text-decoration: underline;
+      display: block;
+      margin-top: 10px;
+    }
+
+    /* Sombra y animación para las tarjetas */
+    .card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card:hover {
+      transform: translateY(-10px); /* Efecto de elevación */
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Sombra más fuerte al pasar el mouse */
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+  <div class="container full-height d-flex justify-content-center align-items-center flex-column">
+    <h1 class="mb-4 text-center">Catálogo de Ventas</h1>
+
+    <input type="file" id="uploadExcel" class="mb-3" />
+
+    <select id="sheetSelector" class="form-control mb-3" style="display:none;" onchange="loadSheet()">
+      <option value="">Selecciona una pestaña</option>
+    </select>
+
+    <div id="output" class="w-100"></div>
+  </div>
+
+  <footer class="bg-dark mt-5" style="background: linear-gradient(to right, #000000, #00008B);">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <p class="text-light">&copy; 2024 Catálogo de Ventas. Todos los derechos reservados.</p>
+        </div>
+        <div class="col-md-6 text-md-right">
+          <a href="#" class="text-light">Política de privacidad</a> |
+          <a href="#" class="text-light">Términos y condiciones</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+
+  <script>
+    let workbookGlobal;
+
+    document.getElementById('uploadExcel').addEventListener('change', handleFile, false);
+
+    function handleFile(e) {
+      var file = e.target.files[0];
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var data = new Uint8Array(e.target.result);
+        var workbook = XLSX.read(data, { type: 'array' });
+        workbookGlobal = workbook;
+        var sheetSelector = document.getElementById('sheetSelector');
+        sheetSelector.style.display = 'inline-block';
+        sheetSelector.innerHTML = '<option value="">Selecciona una pestaña</option>';
+        workbook.SheetNames.forEach(function (sheetName, index) {
+          var option = document.createElement('option');
+          option.value = index;
+          option.text = sheetName;
+          sheetSelector.appendChild(option);
+        });
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function isBase64Image(base64String) {
+      if (typeof base64String === "string") {
+        return base64String && base64String.startsWith("data:image/");
+      } else {
+        return false;
+      }
+    }
+
+    function loadSheet() {
+      var sheetIndex = document.getElementById('sheetSelector').value;
+      if (sheetIndex === '') {
+        document.getElementById('output').innerHTML = '';
+        return;
+      }
+      var sheetName = workbookGlobal.SheetNames[sheetIndex];
+      var sheet = workbookGlobal.Sheets[sheetName];
+      var sheetRange = XLSX.utils.decode_range(sheet['!ref']);
+      createCardsFromExcel(sheet, sheetRange);
+    }
+
+    function createCardsFromExcel(sheet, data) {
+    var output = document.getElementById('output');
+    output.innerHTML = ''; // Limpiar el contenido previo
+    var rowHtml = '<div class="row">'; // Abrir la primera fila
+    var cardCount = 0;
+
+    for (var rowNum = data.s.r + 1; rowNum <= data.e.r; rowNum++) { // Saltar la fila de cabecera
+      // Saltamos la columna 1 (índice 0), así que comenzamos desde la columna 2 (índice 1)
+      var productName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 1 })]; // Columna B (índice 1)
+      var productValue = productName ? productName.v : 'Sin nombre'; // Obtener nombre del producto
+
+      rowHtml += `
+        <div class="col-md-4 mt-3">
+          <div class="card" style="width: 18rem;">
+            <img src="https://via.placeholder.com/150" class="card-img-top" alt="Imagen de producto">
+            <div class="card-body">
+              <h5 class="card-title">${productValue}</h5>
+              <p class="card-text" id="cardText${rowNum}">`;
+
+      // Generar contenido de la tarjeta para cada columna de la fila
+      let pricesHtml = '<div style="line-height: 1.5;">'; // Variable para almacenar los precios con estilo en línea
+      for (var colNum = 1; colNum <= data.e.c; colNum++) { // Iniciar desde la columna 2 (índice 1)
+        var cellAddress = XLSX.utils.encode_cell({ r: rowNum, c: colNum });
+        var cell = sheet[cellAddress];
+        var cellValue = cell ? cell.v : '';
+
+        // Verificar si la columna actual contiene precios (asume que las columnas 5 y 7 tienen precios y la columna 6 tiene el IVA)
+        if ([4, 6].includes(colNum) && !isNaN(cellValue)) { // Ajustar para las columnas de precios (5 y 7)
+          // Formatear el número como moneda colombiana (COP)
+          let formattedPrice = parseFloat(cellValue).toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
+          pricesHtml += '<strong style="color: green;">' + formattedPrice + '</strong><br>'; // Mostrar el precio formateado y resaltado
+        } else if (colNum === 5 && !isNaN(cellValue)) { // Ajustar para la columna de IVA (6)
+          pricesHtml += '<strong style="color: orange;">IVA ' + cellValue + '</strong><br>'; // Mostrar el IVA como "IVA 0.19"
+        }
+
+        // Verificar si la celda contiene una imagen en formato base64
+        else if (isBase64Image(cellValue)) {
+          rowHtml += '<img src="' + cellValue + '" width="100" class="mb-2"/>';
+        } else {
+          rowHtml += cellValue + ' ';
+        }
+      }
+
+      pricesHtml += '</div>'; // Cerrar el div de precios
+      rowHtml += `${pricesHtml}</p> <!-- Agregar los precios debajo del texto -->
+              <span class="show-more" id="showMoreBtn${rowNum}">Leer más</span>
+              <a href="https://wa.me/573163615434" class="btn btn-primary mt-2">Comunicarme</a>
+            </div>
+          </div>
+        </div>`;
+
+      cardCount++;
+
+      // Si ya hay 3 tarjetas en la fila, cerrar la fila y abrir una nueva
+      if (cardCount % 3 === 0) {
+        rowHtml += '</div><div class="row">'; // Cerrar fila anterior y abrir nueva
+      }
+    }
+
+    rowHtml += '</div>'; // Cerrar la última fila
+    output.innerHTML = rowHtml;
+
+    // Añadir el comportamiento de expandir/colapsar texto a cada tarjeta
+    for (var rowNum = data.s.r + 1; rowNum <= data.e.r; rowNum++) {
+      addExpandFunctionality(rowNum);
+    }
+  }
+
+    function addExpandFunctionality(rowNum) {
+      document.getElementById(`showMoreBtn${rowNum}`).addEventListener('click', function () {
+        var cardText = document.getElementById(`cardText${rowNum}`);
+        if (cardText.classList.contains('expanded')) {
+          cardText.classList.remove('expanded');
+          this.textContent = 'Leer más';
+        } else {
+          cardText.classList.add('expanded');
+          this.textContent = 'Leer menos';
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
