@@ -1,4 +1,4 @@
-//* Estilos para limitar el texto dentro de la card */
+/* Estilos para limitar el texto dentro de la card */
 .card-text {
   max-height: 4em; /* Mostrar solo 2 líneas de texto */
   overflow: hidden;
@@ -14,7 +14,7 @@
   cursor: pointer;
   color: #007bff;
   text-decoration: underline;
-  display: block;
+  display: block; 
   margin-top: 10px;
 }
 
@@ -29,6 +29,11 @@
 }
 
 footer {
+  width: 100%;
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.8), rgba(0, 123, 255, 0.8)); /* Gradiente de negro a azul */
   color: white; /* Cambiar el color del texto a blanco para mayor contraste */
+  padding: 10px 0;
+  text-align: center; /* Alinear el texto al centro */
+  margin-top: 20px; /* Añadir un margen superior para separar del contenido */
 }
+

@@ -41,6 +41,30 @@
 </head>
 <body class="bg-light">
 
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">
+      <img src="ico/letra-d.png" alt="Logo" width="30" height="30" class="d-inline-block align-top">
+      Catálogo de Ventas
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="#">Inicio</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Productos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Contacto</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
   <div class="container full-height d-flex justify-content-center align-items-center flex-column">
     <h1 class="mb-4 text-center">Catálogo de Ventas</h1>
 
@@ -67,7 +91,6 @@
     </div>
   </footer>
   
-
   <script>
     let workbookGlobal;
 
@@ -114,86 +137,78 @@
     }
 
     function createCardsFromExcel(sheet, data) {
-    var output = document.getElementById('output');
-    output.innerHTML = ''; // Limpiar el contenido previo
-    var rowHtml = '<div class="row">'; // Abrir la primera fila
-    var cardCount = 0;
+      var output = document.getElementById('output');
+      output.innerHTML = ''; // Limpiar el contenido previo
+      var rowHtml = '<div class="row">'; // Abrir la primera fila
+      var cardCount = 0;
 
-    for (var rowNum = data.s.r + 1; rowNum <= data.e.r; rowNum++) { // Saltar la fila de cabecera
-      // Saltamos la columna 1 (índice 0), así que comenzamos desde la columna 2 (índice 1)
-      var productName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 1 })]; // Columna B (índice 1)
-      var productValue = productName ? productName.v : 'Sin nombre'; // Obtener nombre del producto
+      for (var rowNum = data.s.r + 1; rowNum <= data.e.r; rowNum++) { // Saltar la fila de cabecera
+        // Saltamos la columna 1 (índice 0), así que comenzamos desde la columna 2 (índice 1)
+        var productName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 1 })]; // Columna B (índice 1)
+        var productValue = productName ? productName.v : 'Sin nombre'; // Obtener nombre del producto
 
-      rowHtml += `
-        <div class="col-md-4 mt-3">
-          <div class="card" style="width: 18rem;">
-            <img src="https://via.placeholder.com/150" class="card-img-top" alt="Imagen de producto">
-            <div class="card-body">
-              <h5 class="card-title">${productValue}</h5>
-              <p class="card-text" id="cardText${rowNum}">`;
+        rowHtml += `
+          <div class="col-md-4 mt-3">
+            <div class="card" style="width: 18rem;">
+              <img src="https://via.placeholder.com/150" class="card-img-top" alt="Imagen de producto">
+              <div class="card-body">
+                <h5 class="card-title">${productValue}</h5>
+                <p class="card-text" id="cardText${rowNum}">`;
 
-      // Generar contenido de la tarjeta para cada columna de la fila
-      let pricesHtml = '<div style="line-height: 1.5;">'; // Variable para almacenar los precios con estilo en línea
-      for (var colNum = 1; colNum <= data.e.c; colNum++) { // Iniciar desde la columna 2 (índice 1)
-        var cellAddress = XLSX.utils.encode_cell({ r: rowNum, c: colNum });
-        var cell = sheet[cellAddress];
-        var cellValue = cell ? cell.v : '';
+        // Generar contenido de la tarjeta para cada columna de la fila
+        let pricesHtml = '<div style="line-height: 1.5;">'; // Variable para almacenar los precios con estilo en línea
+        for (var colNum = 1; colNum <= data.e.c; colNum++) { // Iniciar desde la columna 2 (índice 1)
+          var cellAddress = XLSX.utils.encode_cell({ r: rowNum, c: colNum });
+          var cell = sheet[cellAddress];
+          var cellValue = cell ? cell.v : '';
 
-        // Verificar si la columna actual contiene precios (asume que las columnas 5 y 7 tienen precios y la columna 6 tiene el IVA)
-        if ([4, 6].includes(colNum) && !isNaN(cellValue)) { // Ajustar para las columnas de precios (5 y 7)
-          // Formatear el número como moneda colombiana (COP)
-          let formattedPrice = parseFloat(cellValue).toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
-          pricesHtml += '<strong style="color: green;">' + formattedPrice + '</strong><br>'; // Mostrar el precio formateado y resaltado
-        } else if (colNum === 5 && !isNaN(cellValue)) { // Ajustar para la columna de IVA (6)
-          pricesHtml += '<strong style="color: orange;">IVA ' + cellValue + '</strong><br>'; // Mostrar el IVA como "IVA 0.19"
+          // Verificar si la columna actual contiene precios (asume que las columnas 5 y 7 tienen precios y la columna 6 tiene el IVA)
+          if ([4, 6].includes(colNum) && !isNaN(cellValue)) { // Ajustar para las columnas de precios (5 y 7)
+            // Formatear el número como moneda colombiana (COP)
+            let formattedPrice = parseFloat(cellValue).toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
+            pricesHtml += '<strong style="color: green;">' + formattedPrice + '</strong><br>'; // Mostrar el precio formateado y resaltado
+          } else if (colNum === 5 && !isNaN(cellValue)) { // Ajustar para la columna de IVA (6)
+            // Cambiar la representación del IVA
+            let ivaPercentage = (cellValue * 100).toFixed(0); // Convertir 0.19 a 19
+            pricesHtml += '<strong style="color: orange;">IVA ' + ivaPercentage + '%</strong><br>'; // Mostrar el IVA como "IVA 19%"
+          }
+
+          // Verificar si la celda contiene una imagen en formato base64
+          else if (isBase64Image(cellValue)) {
+            rowHtml += '<img src="' + cellValue + '" width="100" class="mb-2"/>';
+          } else {
+            rowHtml += cellValue + ' ';
+          }
         }
 
-        // Verificar si la celda contiene una imagen en formato base64
-        else if (isBase64Image(cellValue)) {
-          rowHtml += '<img src="' + cellValue + '" width="100" class="mb-2"/>';
-        } else {
-          rowHtml += cellValue + ' ';
-        }
-      }
-
-      pricesHtml += '</div>'; // Cerrar el div de precios
-      rowHtml += `${pricesHtml}</p> <!-- Agregar los precios debajo del texto -->
-              <span class="show-more" id="showMoreBtn${rowNum}">Leer más</span>
-              <a href="https://wa.me/573163615434" class="btn btn-primary mt-2">Comunicarme</a>
+        pricesHtml += '</div>'; // Cerrar el div de precios
+        rowHtml += `${pricesHtml}</p> <!-- Agregar los precios debajo del texto -->
+                <span class="show-more" id="showMoreBtn${rowNum}">Leer más</span>
+                <a href="https://wa.me/573163615434" class="btn btn-primary mt-2">Comunicarme</a>
+              </div>
             </div>
           </div>
-        </div>`;
+        `;
 
-      cardCount++;
+        cardCount++;
+        if (cardCount % 3 === 0) { // Cerrar la fila cada 3 tarjetas
+          rowHtml += '</div><div class="row">'; // Cerrar la fila y abrir una nueva
+        }
+      }
 
-      // Si ya hay 3 tarjetas en la fila, cerrar la fila y abrir una nueva
-      if (cardCount % 3 === 0) {
-        rowHtml += '</div><div class="row">'; // Cerrar fila anterior y abrir nueva
+      rowHtml += '</div>'; // Cerrar la última fila
+      output.innerHTML = rowHtml;
+
+      // Agregar eventos para el botón "Leer más"
+      for (let i = data.s.r + 1; i <= data.e.r; i++) {
+        document.getElementById(`showMoreBtn${i}`).addEventListener('click', function () {
+          const cardText = document.getElementById(`cardText${i}`);
+          cardText.classList.toggle('expanded'); // Alternar la clase "expanded"
+          this.textContent = cardText.classList.contains('expanded') ? 'Leer menos' : 'Leer más'; // Cambiar texto del botón
+        });
       }
     }
-
-    rowHtml += '</div>'; // Cerrar la última fila
-    output.innerHTML = rowHtml;
-
-    // Añadir el comportamiento de expandir/colapsar texto a cada tarjeta
-    for (var rowNum = data.s.r + 1; rowNum <= data.e.r; rowNum++) {
-      addExpandFunctionality(rowNum);
-    }
-  }
-
-    function addExpandFunctionality(rowNum) {
-      document.getElementById(`showMoreBtn${rowNum}`).addEventListener('click', function () {
-        var cardText = document.getElementById(`cardText${rowNum}`);
-        if (cardText.classList.contains('expanded')) {
-          cardText.classList.remove('expanded');
-          this.textContent = 'Leer más';
-        } else {
-          cardText.classList.add('expanded');
-          this.textContent = 'Leer menos';
-        }
-      });
-    }
   </script>
-
 </body>
 </html>
+
