@@ -7,16 +7,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
-    /* Estilos para limitar el texto dentro de la card */
     .card-text {
-      max-height: 4em; /* Mostrar solo 2 líneas de texto */
+      max-height: 4em; 
       overflow: hidden;
       text-overflow: ellipsis;
       transition: max-height 0.3s ease;
     }
 
     .card-text.expanded {
-      max-height: none; /* Permitir expandir la altura */
+      max-height: none; 
     }
 
     .show-more {
@@ -27,21 +26,19 @@
       margin-top: 10px;
     }
 
-    /* Sombra y animación para las tarjetas */
     .card {
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     .card:hover {
-      transform: translateY(-10px); /* Efecto de elevación */
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Sombra más fuerte al pasar el mouse */
+      transform: translateY(-10px); 
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); 
     }
   </style>
 </head>
 <body class="bg-light">
 
-  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="#">
       <img src="ico/letra-d.png" alt="Logo" width="30" height="30" class="d-inline-block align-top">
@@ -51,17 +48,19 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav">
+      <ul class="navbar-nav mr-auto">
         <li class="nav-item active">
           <a class="nav-link" href="#">Inicio</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#">Productos</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Contacto</a>
-        </li>
       </ul>
+      <form class="form-inline my-2 my-lg-0">
+        <select id="sheetSelector" class="form-control" style="display:none;" onchange="loadSheet()">
+          <option value="">Selecciona una pestaña</option>
+        </select>
+      </form>
     </div>
   </nav>
 
@@ -69,10 +68,6 @@
     <h1 class="mb-4 text-center">Catálogo de Ventas</h1>
 
     <input type="file" id="uploadExcel" class="mb-3" />
-
-    <select id="sheetSelector" class="form-control mb-3" style="display:none;" onchange="loadSheet()">
-      <option value="">Selecciona una pestaña</option>
-    </select>
 
     <div id="output" class="w-100"></div>
   </div>
@@ -94,15 +89,40 @@
   <script>
     let workbookGlobal;
 
+    // Cargar datos desde localStorage al iniciar la página
+    window.onload = function() {
+      const savedData = localStorage.getItem('excelData');
+      if (savedData) {
+        workbookGlobal = JSON.parse(savedData);
+        const sheetSelector = document.getElementById('sheetSelector');
+        sheetSelector.style.display = 'inline-block';
+        sheetSelector.innerHTML = '<option value="">Selecciona una pestaña</option>';
+        workbookGlobal.SheetNames.forEach(function (sheetName, index) {
+          var option = document.createElement('option');
+          option.value = index;
+          option.text = sheetName;
+          sheetSelector.appendChild(option);
+        });
+      }
+    };
+
     document.getElementById('uploadExcel').addEventListener('change', handleFile, false);
 
     function handleFile(e) {
       var file = e.target.files[0];
+      if (!file) return;
+
+      document.getElementById('uploadExcel').style.display = 'none';
+
       var reader = new FileReader();
       reader.onload = function (e) {
         var data = new Uint8Array(e.target.result);
         var workbook = XLSX.read(data, { type: 'array' });
         workbookGlobal = workbook;
+
+        // Guardar los datos en localStorage
+        localStorage.setItem('excelData', JSON.stringify(workbookGlobal));
+
         var sheetSelector = document.getElementById('sheetSelector');
         sheetSelector.style.display = 'inline-block';
         sheetSelector.innerHTML = '<option value="">Selecciona una pestaña</option>';
@@ -130,6 +150,7 @@
         document.getElementById('output').innerHTML = '';
         return;
       }
+
       var sheetName = workbookGlobal.SheetNames[sheetIndex];
       var sheet = workbookGlobal.Sheets[sheetName];
       var sheetRange = XLSX.utils.decode_range(sheet['!ref']);
@@ -138,14 +159,13 @@
 
     function createCardsFromExcel(sheet, data) {
       var output = document.getElementById('output');
-      output.innerHTML = ''; // Limpiar el contenido previo
-      var rowHtml = '<div class="row">'; // Abrir la primera fila
+      output.innerHTML = ''; 
+      var rowHtml = '<div class="row">';
       var cardCount = 0;
 
-      for (var rowNum = data.s.r + 1; rowNum <= data.e.r; rowNum++) { // Saltar la fila de cabecera
-        // Saltamos la columna 1 (índice 0), así que comenzamos desde la columna 2 (índice 1)
-        var productName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 1 })]; // Columna B (índice 1)
-        var productValue = productName ? productName.v : 'Sin nombre'; // Obtener nombre del producto
+      for (var rowNum = data.s.r + 1; rowNum <= data.e.r; rowNum++) { 
+        var productName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 1 })]; 
+        var productValue = productName ? productName.v : 'Sin nombre'; 
 
         rowHtml += `
           <div class="col-md-4 mt-3">
@@ -155,60 +175,49 @@
                 <h5 class="card-title">${productValue}</h5>
                 <p class="card-text" id="cardText${rowNum}">`;
 
-        // Generar contenido de la tarjeta para cada columna de la fila
-        let pricesHtml = '<div style="line-height: 1.5;">'; // Variable para almacenar los precios con estilo en línea
-        for (var colNum = 1; colNum <= data.e.c; colNum++) { // Iniciar desde la columna 2 (índice 1)
+        let pricesHtml = '<div style="line-height: 1.5;">'; 
+        for (var colNum = 1; colNum <= data.e.c; colNum++) { 
           var cellAddress = XLSX.utils.encode_cell({ r: rowNum, c: colNum });
           var cell = sheet[cellAddress];
           var cellValue = cell ? cell.v : '';
 
-          // Verificar si la columna actual contiene precios (asume que las columnas 5 y 7 tienen precios y la columna 6 tiene el IVA)
-          if ([4, 6].includes(colNum) && !isNaN(cellValue)) { // Ajustar para las columnas de precios (5 y 7)
-            // Formatear el número como moneda colombiana (COP)
+          if ([4, 6].includes(colNum) && !isNaN(cellValue)) { 
             let formattedPrice = parseFloat(cellValue).toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
-            pricesHtml += '<strong style="color: green;">' + formattedPrice + '</strong><br>'; // Mostrar el precio formateado y resaltado
-          } else if (colNum === 5 && !isNaN(cellValue)) { // Ajustar para la columna de IVA (6)
-            // Cambiar la representación del IVA
-            let ivaPercentage = (cellValue * 100).toFixed(0); // Convertir 0.19 a 19
-            pricesHtml += '<strong style="color: orange;">IVA ' + ivaPercentage + '%</strong><br>'; // Mostrar el IVA como "IVA 19%"
-          }
-
-          // Verificar si la celda contiene una imagen en formato base64
-          else if (isBase64Image(cellValue)) {
+            pricesHtml += '<strong style="color: green;">' + formattedPrice + '</strong><br>'; 
+          } else if (colNum === 5 && !isNaN(cellValue)) { 
+            let ivaPercentage = (cellValue * 100).toFixed(0);
+            pricesHtml += '<strong style="color: orange;">IVA ' + ivaPercentage + '%</strong><br>'; 
+          } else if (isBase64Image(cellValue)) {
             rowHtml += '<img src="' + cellValue + '" width="100" class="mb-2"/>';
           } else {
             rowHtml += cellValue + ' ';
           }
         }
 
-        pricesHtml += '</div>'; // Cerrar el div de precios
+        pricesHtml += '</div>'; 
         rowHtml += `${pricesHtml}</p> <!-- Agregar los precios debajo del texto -->
                 <span class="show-more" id="showMoreBtn${rowNum}">Leer más</span>
                 <a href="https://wa.me/573163615434" class="btn btn-primary mt-2">Comunicarme</a>
               </div>
             </div>
-          </div>
-        `;
+          </div>`;
 
         cardCount++;
-        if (cardCount % 3 === 0) { // Cerrar la fila cada 3 tarjetas
-          rowHtml += '</div><div class="row">'; // Cerrar la fila y abrir una nueva
+        if (cardCount % 3 === 0) {
+          rowHtml += '</div><div class="row">'; 
         }
       }
+      rowHtml += '</div>'; 
+      output.innerHTML = rowHtml; 
 
-      rowHtml += '</div>'; // Cerrar la última fila
-      output.innerHTML = rowHtml;
-
-      // Agregar eventos para el botón "Leer más"
-      for (let i = data.s.r + 1; i <= data.e.r; i++) {
-        document.getElementById(`showMoreBtn${i}`).addEventListener('click', function () {
-          const cardText = document.getElementById(`cardText${i}`);
-          cardText.classList.toggle('expanded'); // Alternar la clase "expanded"
-          this.textContent = cardText.classList.contains('expanded') ? 'Leer menos' : 'Leer más'; // Cambiar texto del botón
+      document.querySelectorAll('.show-more').forEach((button, index) => {
+        button.addEventListener('click', function() {
+          const cardText = document.getElementById(`cardText${index + 1}`);
+          cardText.classList.toggle('expanded');
+          button.textContent = cardText.classList.contains('expanded') ? 'Leer menos' : 'Leer más';
         });
-      }
+      });
     }
   </script>
 </body>
 </html>
-

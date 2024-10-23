@@ -1,13 +1,12 @@
-/* Estilos para limitar el texto dentro de la card */
 .card-text {
-  max-height: 4em; /* Mostrar solo 2 líneas de texto */
+  max-height: 4em; 
   overflow: hidden;
   text-overflow: ellipsis;
   transition: max-height 0.3s ease;
 }
 
 .card-text.expanded {
-  max-height: none; /* Permitir expandir la altura */
+  max-height: none; 
 }
 
 .show-more {
@@ -17,23 +16,49 @@
   display: block; 
   margin-top: 10px;
 }
-
-/* Estilos para las tarjetas */
 .card {
-  transition: transform 0.2s, box-shadow 0.2s; /* Añadir transición para efectos */
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .card:hover {
-  transform: translateY(-5px); /* Elevar la tarjeta ligeramente */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Sombra más intensa al pasar el mouse */
+  transform: translateY(-5px); 
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); 
 }
 
 footer {
   width: 100%;
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.8), rgba(0, 123, 255, 0.8)); /* Gradiente de negro a azul */
-  color: white; /* Cambiar el color del texto a blanco para mayor contraste */
+  color: white; 
   padding: 10px 0;
-  text-align: center; /* Alinear el texto al centro */
-  margin-top: 20px; /* Añadir un margen superior para separar del contenido */
+  text-align: center; 
+  margin-top: 20px; 
 }
 
+.navbar .dropdown-menu {
+  background-color: #f8f9fa; 
+  border: 1px solid #ddd;    
+  border-radius: 5px;        
+}
+
+.navbar .dropdown-item {
+  color: #333;               
+  padding: 10px 15px;        
+  transition: background-color 0.3s ease; 
+}
+
+.navbar .dropdown-item:hover {
+  background-color: #007bff; 
+  color: #fff;               
+}
+
+.navbar .dropdown-toggle {
+  color: #333;
+}
+
+.navbar .dropdown-toggle:hover {
+  color: #007bff;
+}
+
+#uploadExcel {
+  display: none; 
+}
