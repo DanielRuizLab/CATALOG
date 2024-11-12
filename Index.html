@@ -1,42 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Catálogo</title>
   <link rel="icon" href="ico/let.ico" type="image/x-icon">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="styles.css"> 
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <style>
-    .card-text {
-      max-height: 4em; 
-      overflow: hidden;
-      text-overflow: ellipsis;
-      transition: max-height 0.3s ease;
-    }
-
-    .card-text.expanded {
-      max-height: none; 
-    }
-
-    .show-more {
-      cursor: pointer;
-      color: #007bff;
-      text-decoration: underline;
-      display: block;
-      margin-top: 10px;
-    }
-
-    .card {
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .card:hover {
-      transform: translateY(-10px); 
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); 
-    }
-  </style>
 </head>
 
 <body class="bg-light">
@@ -46,7 +18,8 @@
       <img src="ico/letra-d.png" alt="Logo" width="30" height="30" class="d-inline-block align-top">
       Catálogo de Ventas
     </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
@@ -68,187 +41,10 @@
 
   <div class="container full-height d-flex justify-content-center align-items-center flex-column">
     <h1 class="mb-4 text-center">Catálogo de Ventas</h1>
-
     <input type="file" id="uploadExcel" class="mb-3" />
 
     <div id="output" class="w-100"></div>
   </div>
-
-  <script>
-    let workbookGlobal;
-
-    window.onload = function() {
-  const savedData = localStorage.getItem('excelData');
-  const uploadExcel = document.getElementById('uploadExcel');
-  const sheetSelector = document.getElementById('sheetSelector');
-
-  if (savedData) {
-    workbookGlobal = JSON.parse(savedData);
-    uploadExcel.style.display = 'none'; // Oculta el botón si hay datos en localStorage
-    sheetSelector.style.display = 'inline-block';
-
-    sheetSelector.innerHTML = '<option value="">Selecciona una pestaña</option>';
-    workbookGlobal.SheetNames.forEach(function(sheetName, index) {
-      var option = document.createElement('option');
-      option.value = index;
-      option.text = sheetName;
-      sheetSelector.appendChild(option);
-    });
-
-    const selectedSheetIndex = localStorage.getItem('selectedSheetIndex');
-    if (selectedSheetIndex) {
-      sheetSelector.value = selectedSheetIndex;
-      loadSheet();
-    }
-  } else {
-    uploadExcel.style.display = 'inline-block'; 
-
-    fetch('Datexce/Catálogo actualizado 05 de sep.xlsx')
-      .then(response => {
-        if (!response.ok) throw new Error('Error al cargar el archivo');
-        return response.arrayBuffer();
-      })
-      .then(data => {
-        var workbook = XLSX.read(data, { type: 'array' });
-        workbookGlobal = workbook;
-        localStorage.setItem('excelData', JSON.stringify(workbookGlobal));
-
-        sheetSelector.style.display = 'inline-block';
-        sheetSelector.innerHTML = '<option value="">Selecciona una pestaña</option>';
-        workbook.SheetNames.forEach(function(sheetName, index) {
-          var option = document.createElement('option');
-          option.value = index;
-          option.text = sheetName;
-          sheetSelector.appendChild(option);
-        });
-      })
-      .catch(error => {
-        console.error('Error al cargar el archivo:', error);
-      });
-  }
-};
-
-    document.getElementById('uploadExcel').addEventListener('change', handleFile, false);
-
-    function handleFile(e) {
-      var file = e.target.files[0];
-      if (!file) return;
-
-      document.getElementById('uploadExcel').style.display = 'none';
-
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        var data = new Uint8Array(e.target.result);
-        var workbook = XLSX.read(data, { type: 'array' });
-        workbookGlobal = workbook;
-
-        localStorage.setItem('excelData', JSON.stringify(workbookGlobal));
-
-        var sheetSelector = document.getElementById('sheetSelector');
-        sheetSelector.style.display = 'inline-block';
-        sheetSelector.innerHTML = '<option value="">Selecciona una pestaña</option>';
-        workbook.SheetNames.forEach(function (sheetName, index) {
-          var option = document.createElement('option');
-          option.value = index;
-          option.text = sheetName;
-          sheetSelector.appendChild(option);
-        });
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    function isBase64Image(base64String) {
-      if (typeof base64String === "string") {
-        return base64String && base64String.startsWith("data:image/");
-      } else {
-        return false;
-      }
-    }
-
-    function loadSheet() {
-  var sheetIndex = document.getElementById('sheetSelector').value;
-  
-  if (sheetIndex === '') {
-    document.getElementById('output').innerHTML = '';
-    return;
-  }
-
-  localStorage.setItem('selectedSheetIndex', sheetIndex);
-
-  var sheetName = workbookGlobal.SheetNames[sheetIndex];
-  var sheet = workbookGlobal.Sheets[sheetName];
-  var sheetRange = XLSX.utils.decode_range(sheet['!ref']);
-  createCardsFromExcel(sheet, sheetRange);
-}
-
-    function createCardsFromExcel(sheet, data) {
-      var output = document.getElementById('output');
-      output.innerHTML = ''; 
-      var rowHtml = '<div class="row">';
-      var cardCount = 0;
-
-      for (var rowNum = data.s.r + 1; rowNum <= data.e.r; rowNum++) { 
-        var productName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 1 })]; 
-        var productValue = productName ? productName.v : 'Sin nombre'; 
-
-        rowHtml += `
-          <div class="col-md-4 mt-3">
-            <div class="card" style="width: 18rem;">
-              <img src="https://via.placeholder.com/150" class="card-img-top" alt="Imagen de producto">
-              <div class="card-body">
-                <h5 class="card-title">${productValue}</h5>
-                <p class="card-text" id="cardText${rowNum}">`;
-
-        let pricesHtml = '<div style="line-height: 1.5;">'; 
-        for (let colNum = 1; colNum <= data.e.c; colNum++) { 
-          const cellAddress = XLSX.utils.encode_cell({ r: rowNum, c: colNum });
-          const cell = sheet[cellAddress];
-          const cellValue = cell ? cell.v : '';
-
-          if ([4, 6].includes(colNum) && !isNaN(cellValue)) { 
-            const formattedPrice = parseFloat(cellValue).toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
-            pricesHtml += `<strong style="color: green;">${formattedPrice}</strong><br>`; 
-          } else if (colNum === 5 && !isNaN(cellValue)) { 
-            const ivaPercentage = (cellValue * 100).toFixed(0);
-            pricesHtml += `<strong style="color: orange;">IVA ${ivaPercentage}%</strong><br>`; 
-          } else if (isBase64Image(cellValue)) {
-            rowHtml += `<img src="${cellValue}" width="100" class="mb-2"/>`;
-          } else {
-            rowHtml += `${cellValue} `;
-          }
-        }
-
-        pricesHtml += '</div>'; 
-        rowHtml += `${pricesHtml}</p>
-                <span class="show-more" id="showMoreBtn${rowNum}">Leer más</span>
-                <a href="https://wa.me/573163615434" class="btn btn-primary mt-2">Comunicarme</a>
-              </div>
-            </div>
-          </div>`;
-
-        cardCount++;
-        
-        if (cardCount % 3 === 0) { 
-          rowHtml += '</div><div class="row">';
-        }
-      }
-
-      rowHtml += '</div>';
-      output.innerHTML = rowHtml;
-
-      document.querySelectorAll('.show-more').forEach((button, index) => {
-        button.addEventListener('click', function() {
-          const cardText = document.getElementById(`cardText${index + 1}`);
-          cardText.classList.toggle('expanded');
-          button.textContent = cardText.classList.contains('expanded') ? 'Leer menos' : 'Leer más';
-        });
-      });
-    }
-
-    function isBase64Image(base64String) {
-      return typeof base64String === "string" && base64String.startsWith("data:image/");
-    }
-  </script>
 
   <footer class="bg-dark mt-5" style="background: linear-gradient(to right, #000000, #00008B);">
     <div class="container">
@@ -263,5 +59,9 @@
       </div>
     </div>
   </footer>
+
+  <script src="script.js"></script>
+
 </body>
+
 </html>

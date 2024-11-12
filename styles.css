@@ -1,0 +1,38 @@
+body {
+    font-family: Arial, sans-serif;
+  }
+  
+  .card-text {
+    max-height: 4em; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: max-height 0.3s ease;
+  }
+  
+  .card-text.expanded {
+    max-height: none; 
+  }
+  
+  .show-more {
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: underline;
+    display: block;
+    margin-top: 10px;
+  }
+  
+  .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card:hover {
+    transform: translateY(-10px); 
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); 
+  }
+  
+  footer {
+    background: linear-gradient(to right, #000000, #00008B);
+    color: white;
+  }
+  
