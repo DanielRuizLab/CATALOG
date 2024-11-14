@@ -1,18 +1,65 @@
 let workbookGlobal;
 
-window.onload = function() {
+function initializeCatalog() {
+  const savedData = localStorage.getItem('jsonData');
+  
+  if (savedData) {
+    try {
+      const jsonData = JSON.parse(savedData);
+      if (validateJSONStructure(jsonData)) {
+        renderCatalog(jsonData);
+        return;
+      } else {
+        console.error("Formato de JSON guardado no es válido, cargando archivo por defecto.");
+      }
+    } catch (error) {
+      console.error("Error al parsear JSON desde localStorage, cargando archivo por defecto.");
+    }
+  }
+  
+  loadJSONCatalog();
+}
+
+function validateJSONStructure(data) {
+  if (!Array.isArray(data)) return false;
+  return data.every(item => 
+    item.hasOwnProperty('nombre') &&
+    item.hasOwnProperty('precio') &&
+    item.hasOwnProperty('descripcion')
+  );
+}
+
+function loadJSONCatalog() {
+  fetch('Datexce/catalogo.json')
+    .then(response => {
+      if (!response.ok) throw new Error('Error al cargar el archivo JSON');
+      return response.json();
+    })
+    .then(data => {
+      if (!validateJSONStructure(data)) {
+        throw new Error('Formato de archivo JSON incorrecto');
+      }
+      localStorage.setItem('jsonData', JSON.stringify(data));
+      renderCatalog(data);
+    })
+    .catch(error => {
+      console.error('Error al procesar el archivo JSON:', error);
+    });
+}
+
+function handleExcelLoad() {
   const savedData = localStorage.getItem('excelData');
   const uploadExcel = document.getElementById('uploadExcel');
   const sheetSelector = document.getElementById('sheetSelector');
 
   if (savedData) {
     workbookGlobal = JSON.parse(savedData);
-    uploadExcel.style.display = 'none'; 
+    uploadExcel.style.display = 'none';
     sheetSelector.style.display = 'inline-block';
 
-    sheetSelector.innerHTML = '<option value="">Selecciona una pestaña</option>';
+    sheetSelector.innerHTML = '<option value="">Selecciona un Producto</option>';
     workbookGlobal.SheetNames.forEach(function(sheetName, index) {
-      var option = document.createElement('option');
+      const option = document.createElement('option');
       option.value = index;
       option.text = sheetName;
       sheetSelector.appendChild(option);
@@ -24,22 +71,21 @@ window.onload = function() {
       loadSheet();
     }
   } else {
-    uploadExcel.style.display = 'inline-block'; 
-
+    uploadExcel.style.display = 'inline-block';
     fetch('Datexce/Catálogo actualizado 05 de sep.xlsx')
       .then(response => {
         if (!response.ok) throw new Error('Error al cargar el archivo');
         return response.arrayBuffer();
       })
       .then(data => {
-        var workbook = XLSX.read(data, { type: 'array' });
+        const workbook = XLSX.read(data, { type: 'array' });
         workbookGlobal = workbook;
         localStorage.setItem('excelData', JSON.stringify(workbookGlobal));
 
         sheetSelector.style.display = 'inline-block';
-        sheetSelector.innerHTML = '<option value="">Selecciona una pestaña</option>';
+        sheetSelector.innerHTML = '<option value="">Selecciona un Producto</option>';
         workbook.SheetNames.forEach(function(sheetName, index) {
-          var option = document.createElement('option');
+          const option = document.createElement('option');
           option.value = index;
           option.text = sheetName;
           sheetSelector.appendChild(option);
@@ -49,29 +95,29 @@ window.onload = function() {
         console.error('Error al cargar el archivo:', error);
       });
   }
-};
+}
 
 document.getElementById('uploadExcel').addEventListener('change', handleFile, false);
 
 function handleFile(e) {
-  var file = e.target.files[0];
+  const file = e.target.files[0];
   if (!file) return;
 
   document.getElementById('uploadExcel').style.display = 'none';
 
-  var reader = new FileReader();
+  const reader = new FileReader();
   reader.onload = function (e) {
-    var data = new Uint8Array(e.target.result);
-    var workbook = XLSX.read(data, { type: 'array' });
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
     workbookGlobal = workbook;
 
     localStorage.setItem('excelData', JSON.stringify(workbookGlobal));
 
-    var sheetSelector = document.getElementById('sheetSelector');
+    const sheetSelector = document.getElementById('sheetSelector');
     sheetSelector.style.display = 'inline-block';
-    sheetSelector.innerHTML = '<option value="">Selecciona una pestaña</option>';
+    sheetSelector.innerHTML = '<option value="">Selecciona un producto</option>';
     workbook.SheetNames.forEach(function (sheetName, index) {
-      var option = document.createElement('option');
+      const option = document.createElement('option');
       option.value = index;
       option.text = sheetName;
       sheetSelector.appendChild(option);
@@ -85,7 +131,7 @@ function isBase64Image(base64String) {
 }
 
 function loadSheet() {
-  var sheetIndex = document.getElementById('sheetSelector').value;
+  const sheetIndex = document.getElementById('sheetSelector').value;
 
   if (sheetIndex === '') {
     document.getElementById('output').innerHTML = '';
@@ -94,21 +140,21 @@ function loadSheet() {
 
   localStorage.setItem('selectedSheetIndex', sheetIndex);
 
-  var sheetName = workbookGlobal.SheetNames[sheetIndex];
-  var sheet = workbookGlobal.Sheets[sheetName];
-  var sheetRange = XLSX.utils.decode_range(sheet['!ref']);
+  const sheetName = workbookGlobal.SheetNames[sheetIndex];
+  const sheet = workbookGlobal.Sheets[sheetName];
+  const sheetRange = XLSX.utils.decode_range(sheet['!ref']);
   createCardsFromExcel(sheet, sheetRange);
 }
 
 function createCardsFromExcel(sheet, data) {
-  var output = document.getElementById('output');
+  const output = document.getElementById('output');
   output.innerHTML = ''; 
-  var rowHtml = '<div class="row">';
-  var cardCount = 0;
+  let rowHtml = '<div class="row">';
+  let cardCount = 0;
 
-  for (var rowNum = data.s.r + 1; rowNum <= data.e.r; rowNum++) { 
-    var productName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 1 })]; 
-    var productValue = productName ? productName.v : 'Sin nombre'; 
+  for (let rowNum = data.s.r + 1; rowNum <= data.e.r; rowNum++) { 
+    const productName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 1 })]; 
+    const productValue = productName ? productName.v : 'Sin nombre'; 
 
     rowHtml += `
       <div class="col-md-4 mt-3">
@@ -163,3 +209,8 @@ function createCardsFromExcel(sheet, data) {
     });
   });
 }
+
+window.onload = function() {
+  initializeCatalog();
+  handleExcelLoad();
+};
