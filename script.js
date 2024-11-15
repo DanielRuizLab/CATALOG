@@ -77,7 +77,7 @@ function handleExcelLoad() {
     }
   } else {
     uploadExcel.style.display = 'inline-block';
-    fetch('Datexce/Catálogo actualizado 12 de nov.xlsx')
+    fetch('Datexce/Catálogo 03 de oct. 2024.xlsx')
       .then(response => {
         if (!response.ok) throw new Error('Error al cargar el archivo');
         return response.arrayBuffer();
