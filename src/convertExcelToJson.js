@@ -2,7 +2,7 @@ const xlsx = require('xlsx');
 const fs = require('fs');
 
 const workbook = xlsx.readFile(
-    "C:\\Users\\AV-30580\\Desktop\\CATALOG\\Datexce\\Catálogo actualizado 05 de sep.xlsx"
+    "C:\\Users\\AV-30580\\Desktop\\CATALOG\\Datexce\\Catálogo actualizado 12 de nov.xlsx"
 );
 
 const jsonData = {};
