@@ -33,7 +33,7 @@ function loadJSONCatalog() {
   
   localStorage.removeItem('jsonData');
 
-  fetch(`Datexce/catalogo_V1.2.json?timestamp=${new Date().getTime()}`)
+  fetch(`Datexce/catalogo_V1.json?timestamp=${new Date().getTime()}`)
     .then(response => {
       if (!response.ok) throw new Error('Error al cargar el archivo JSON');
       return response.json();
