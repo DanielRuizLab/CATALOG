@@ -30,7 +30,10 @@ function validateJSONStructure(data) {
 }
 
 function loadJSONCatalog() {
-  fetch(`Datexce/catalogo1.json?timestamp=${new Date().getTime()}`)
+  
+  localStorage.removeItem('jsonData');
+
+  fetch(`Datexce/catalogo_V1.2.json?timestamp=${new Date().getTime()}`)
     .then(response => {
       if (!response.ok) throw new Error('Error al cargar el archivo JSON');
       return response.json();
@@ -40,20 +43,14 @@ function loadJSONCatalog() {
         throw new Error('Formato de archivo JSON incorrecto');
       }
 
-      const storedData = localStorage.getItem('jsonData');
-      const parsedData = storedData ? JSON.parse(storedData) : null;
+      localStorage.setItem('jsonData', JSON.stringify(data));
 
-      // Verifica si los datos nuevos son diferentes de los almacenados
-      if (JSON.stringify(parsedData) !== JSON.stringify(data)) {
-        localStorage.setItem('jsonData', JSON.stringify(data));
-        renderCatalog(data);
-      }
+      renderCatalog(data);
     })
     .catch(error => {
       console.error('Error al procesar el archivo JSON:', error);
     });
 }
-
 
 function handleExcelLoad() {
   const savedData = localStorage.getItem('excelData');
@@ -80,7 +77,7 @@ function handleExcelLoad() {
     }
   } else {
     uploadExcel.style.display = 'inline-block';
-    fetch('Datexce/Catálogo actualizado 05 de sep.xlsx')
+    fetch('Datexce/Catálogo actualizado 12 de nov.xlsx')
       .then(response => {
         if (!response.ok) throw new Error('Error al cargar el archivo');
         return response.arrayBuffer();
