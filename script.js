@@ -1,108 +1,39 @@
 let workbookGlobal;
 
-function initializeCatalog() {
-  const savedData = localStorage.getItem('jsonData');
-  
-  if (savedData) {
-    try {
-      const jsonData = JSON.parse(savedData);
-      if (validateJSONStructure(jsonData)) {
-        renderCatalog(jsonData);
-        return;
-      } else {
-        console.error("Formato de JSON guardado no es válido, cargando archivo por defecto.");
-      }
-    } catch (error) {
-      console.error("Error al parsear JSON desde localStorage, cargando archivo por defecto.");
-    }
-  }
-  
-  loadJSONCatalog();
-}
-
-function validateJSONStructure(data) {
-  if (!Array.isArray(data)) return false;
-  return data.every(item => 
-    item.hasOwnProperty('nombre') &&
-    item.hasOwnProperty('precio') &&
-    item.hasOwnProperty('descripcion')
-  );
-}
-
-function loadJSONCatalog() {
-  
-  localStorage.removeItem('jsonData');
-
-  fetch(`Datexce/catalogo_V1.json?timestamp=${new Date().getTime()}`)
-    .then(response => {
-      if (!response.ok) throw new Error('Error al cargar el archivo JSON');
-      return response.json();
-    })
-    .then(data => {
-      if (!validateJSONStructure(data)) {
-        throw new Error('Formato de archivo JSON incorrecto');
-      }
-
-      localStorage.setItem('jsonData', JSON.stringify(data));
-
-      renderCatalog(data);
-    })
-    .catch(error => {
-      console.error('Error al procesar el archivo JSON:', error);
-    });
-}
-
 function handleExcelLoad() {
-  const savedData = localStorage.getItem('excelData');
   const uploadExcel = document.getElementById('uploadExcel');
   const sheetSelector = document.getElementById('sheetSelector');
 
-  if (savedData) {
-    workbookGlobal = JSON.parse(savedData);
-    uploadExcel.style.display = 'none';
-    sheetSelector.style.display = 'inline-block';
+  uploadExcel.style.display = 'inline-block';
+  fetch('Datexce/Catálogo actualizado 12 de nov.xlsx')
+    .then(response => {
+      if (!response.ok) throw new Error('Error al cargar el archivo');
+      return response.arrayBuffer();
+    })
+    .then(data => {
+      const workbook = XLSX.read(data, { type: 'array' });
+      workbookGlobal = workbook;
 
-    sheetSelector.innerHTML = '<option value="">Selecciona un Producto</option>';
-    workbookGlobal.SheetNames.forEach(function(sheetName, index) {
-      const option = document.createElement('option');
-      option.value = index;
-      option.text = sheetName;
-      sheetSelector.appendChild(option);
-    });
-
-    const selectedSheetIndex = localStorage.getItem('selectedSheetIndex');
-    if (selectedSheetIndex) {
-      sheetSelector.value = selectedSheetIndex;
-      loadSheet();
-    }
-  } else {
-    uploadExcel.style.display = 'inline-block';
-    fetch('Datexce/Catálogo 03 de oct. 2024.xlsx')
-      .then(response => {
-        if (!response.ok) throw new Error('Error al cargar el archivo');
-        return response.arrayBuffer();
-      })
-      .then(data => {
-        const workbook = XLSX.read(data, { type: 'array' });
-        workbookGlobal = workbook;
-        localStorage.setItem('excelData', JSON.stringify(workbookGlobal));
-
-        sheetSelector.style.display = 'inline-block';
-        sheetSelector.innerHTML = '<option value="">Selecciona un Producto</option>';
-        workbook.SheetNames.forEach(function(sheetName, index) {
-          const option = document.createElement('option');
-          option.value = index;
-          option.text = sheetName;
-          sheetSelector.appendChild(option);
-        });
-      })
-      .catch(error => {
-        console.error('Error al cargar el archivo:', error);
+      sheetSelector.style.display = 'inline-block';
+      sheetSelector.innerHTML = '<option value="">Selecciona un Producto</option>';
+      workbook.SheetNames.forEach(function (sheetName, index) {
+        const option = document.createElement('option');
+        option.value = index;
+        option.text = sheetName;
+        sheetSelector.appendChild(option);
       });
-  }
+    })
+    .catch(error => {
+      console.error('Error al cargar el archivo:', error);
+    });
 }
 
-document.getElementById('uploadExcel').addEventListener('change', handleFile, false);
+document.getElementById('uploadExcel').addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  if (file) {
+      console.log(`Archivo seleccionado: ${file.name}`);
+  }
+});
 
 function handleFile(e) {
   const file = e.target.files[0];
@@ -115,8 +46,6 @@ function handleFile(e) {
     const data = new Uint8Array(e.target.result);
     const workbook = XLSX.read(data, { type: 'array' });
     workbookGlobal = workbook;
-
-    localStorage.setItem('excelData', JSON.stringify(workbookGlobal));
 
     const sheetSelector = document.getElementById('sheetSelector');
     sheetSelector.style.display = 'inline-block';
@@ -143,8 +72,6 @@ function loadSheet() {
     return;
   }
 
-  localStorage.setItem('selectedSheetIndex', sheetIndex);
-
   const sheetName = workbookGlobal.SheetNames[sheetIndex];
   const sheet = workbookGlobal.Sheets[sheetName];
   const sheetRange = XLSX.utils.decode_range(sheet['!ref']);
@@ -161,13 +88,17 @@ function createCardsFromExcel(sheet, data) {
     const productName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 1 })]; 
     const productValue = productName ? productName.v : 'Sin nombre'; 
 
-    rowHtml += `
+    const imageName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 7 })];  // Suponiendo que la imagen está en la columna 7 (Índice H)
+    const imageUrl = imageName ? `img/${imageName.v}` : 'https://via.placeholder.com/150';  // Ruta de la imagen
+
+    rowHtml += `  
       <div class="col-md-4 mt-3">
         <div class="card" style="width: 18rem;">
-          <img src="https://via.placeholder.com/150" class="card-img-top" alt="Imagen de producto">
+          <img src="${imageUrl}" class="card-img-top" alt="Imagen de producto">
           <div class="card-body">
             <h5 class="card-title">${productValue}</h5>
-            <p class="card-text" id="cardText${rowNum}">`;
+            <p class="card-text" id="cardText${rowNum}">
+    `;
 
     let pricesHtml = '<div style="line-height: 1.5;">'; 
     for (let colNum = 1; colNum <= data.e.c; colNum++) { 
@@ -188,16 +119,16 @@ function createCardsFromExcel(sheet, data) {
       }
     }
 
-    pricesHtml += '</div>'; 
+    pricesHtml += '</div>';
     rowHtml += `${pricesHtml}</p>
-            <span class="show-more" id="showMoreBtn${rowNum}">Leer más</span>
-            <a href="https://wa.me/573163615434" class="btn btn-primary mt-2">Comunicarme</a>
-          </div>
-        </div>
-      </div>`;
+      <span class="show-more" id="showMoreBtn${rowNum}">Leer más</span>
+      <a href="https://wa.me/573163615434" class="btn btn-primary mt-2" target="_blank">Comunicarme</a>
+    </div>
+  </div>
+</div>`;
 
     cardCount++;
-    
+
     if (cardCount % 3 === 0) { 
       rowHtml += '</div><div class="row">';
     }
@@ -214,8 +145,6 @@ function createCardsFromExcel(sheet, data) {
     });
   });
 }
-
 window.onload = function() {
-  initializeCatalog();
   handleExcelLoad();
 };

@@ -27,7 +27,7 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item active">
-            <a class="nav-link" href="#">Inicio</a>
+            <a class="nav-link" href="Start.html">Inicio</a>
           </li>
 
           <li class="nav-item">
@@ -42,9 +42,13 @@
               <li><a class="dropdown-item" href="#">Acción 1</a></li>
               <li><a class="dropdown-item" href="#">Acción 2</a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#">Algo más</a></li>
+              <li>
+                <label for="uploadExcel" class="dropdown-item" style="cursor: pointer;">Cargar archivo</label>
+                <input type="file" id="uploadExcel" class="d-none" />
+              </li>
             </ul>
           </li>
+
         </ul>
         <form class="d-flex">
           <select id="sheetSelector" class="form-control" style="display:none;" onchange="loadSheet()">
@@ -57,7 +61,7 @@
   
   <div class="container full-height d-flex justify-content-center align-items-center flex-column">
     <h1 class="mb-4 text-center">Catálogo de Ventas</h1>
-    <input type="file" id="uploadExcel" class="mb-3" />
+    
 
     <div id="output" class="w-100"></div>
   </div>
