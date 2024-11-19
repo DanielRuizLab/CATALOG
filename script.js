@@ -5,7 +5,8 @@ function handleExcelLoad() {
   const sheetSelector = document.getElementById('sheetSelector');
 
   uploadExcel.style.display = 'inline-block';
-  fetch('Datexce/Catálogo 03 de oct. 2024.xlsx')
+  
+  fetch('Datexce/Catálogo actualizado 12 de nov.xlsx')
     .then(response => {
       if (!response.ok) throw new Error('Error al cargar el archivo');
       return response.arrayBuffer();
