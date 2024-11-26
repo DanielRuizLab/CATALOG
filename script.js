@@ -89,7 +89,7 @@ function createCardsFromExcel(sheet, data) {
     const productName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 1 })]; 
     const productValue = productName ? productName.v : 'Sin nombre'; 
 
-    const imageName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 7 })];  // Suponiendo que la imagen está en la columna 7 (Índice H)
+    const imageName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 7 })];
     const imageUrl = imageName ? `img/${imageName.v}` : 'https://via.placeholder.com/150';  // Ruta de la imagen
 
     rowHtml += `  
