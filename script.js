@@ -16,7 +16,7 @@ function handleExcelLoad() {
       workbookGlobal = workbook;
 
       sheetSelector.style.display = 'inline-block';
-      sheetSelector.innerHTML = '<option value="">Selecciona un Producto</option>';
+      sheetSelector.innerHTML = '<option value="">Selecciona una Categoria</option>';
       workbook.SheetNames.forEach(function (sheetName, index) {
         const option = document.createElement('option');
         option.value = index;
@@ -82,7 +82,7 @@ function loadSheet() {
 function createCardsFromExcel(sheet, data) {
   const output = document.getElementById('output');
   output.innerHTML = ''; 
-  let rowHtml = '<div class="row">';
+  let rowHtml = '<div class="row">'; 
   let cardCount = 0;
 
   for (let rowNum = data.s.r + 1; rowNum <= data.e.r; rowNum++) { 
@@ -90,10 +90,10 @@ function createCardsFromExcel(sheet, data) {
     const productValue = productName ? productName.v : 'Sin nombre'; 
 
     const imageName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 7 })];
-    const imageUrl = imageName ? `img/${imageName.v}` : 'https://via.placeholder.com/150';  // Ruta de la imagen
+    const imageUrl = imageName ? `img/${imageName.v}` : 'https://via.placeholder.com/150'; 
 
     rowHtml += `  
-      <div class="col-md-4 mt-3">
+      <div class="col-lg-4 col-md-6 col-sm-12 mt-3">
         <div class="card" style="width: 18rem;">
           <img src="${imageUrl}" class="card-img-top" alt="Imagen de producto">
           <div class="card-body">
@@ -145,7 +145,6 @@ function createCardsFromExcel(sheet, data) {
       button.textContent = cardText.classList.contains('expanded') ? 'Leer menos' : 'Leer más';
     });
   });
-}
-window.onload = function() {
+}window.onload = function() {
   handleExcelLoad();
 };

@@ -48,17 +48,17 @@
               </li>
             </ul>
           </li>
-
         </ul>
-        <form class="d-flex">
-          <select id="sheetSelector" class="form-control" style="display:none;" onchange="loadSheet()">
-            <option value="">Selecciona un Producto</option>
-          </select>
-        </form>
       </div>
     </div>
   </nav>
   
+  <div id="productSelectorContainer" class="container my-3">
+    <select id="sheetSelector" class="form-control" onchange="loadSheet()">
+      <option value="">Selecciona una Producto</option>
+    </select>
+  </div>
+
   <div class="container full-height d-flex justify-content-center align-items-center flex-column">
     <h1 class="mb-4 text-center">Catálogo de Ventas</h1>
     <div id="output" class="w-100"></div>
