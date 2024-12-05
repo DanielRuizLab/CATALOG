@@ -50,7 +50,7 @@ function handleFile(e) {
 
     const sheetSelector = document.getElementById('sheetSelector');
     sheetSelector.style.display = 'inline-block';
-    sheetSelector.innerHTML = '<option value="">Selecciona un producto</option>';
+    sheetSelector.innerHTML = '<option value="">Selecciona una Categoria</option>';
     workbook.SheetNames.forEach(function (sheetName, index) {
       const option = document.createElement('option');
       option.value = index;
@@ -102,22 +102,31 @@ function createCardsFromExcel(sheet, data) {
     `;
 
     let pricesHtml = '<div style="line-height: 1.5;">'; 
+    let unitPrice = null;
+    let iva = null;
+
     for (let colNum = 1; colNum <= data.e.c; colNum++) { 
       const cellAddress = XLSX.utils.encode_cell({ r: rowNum, c: colNum });
       const cell = sheet[cellAddress];
       const cellValue = cell ? cell.v : '';
 
-      if ([4, 6].includes(colNum) && !isNaN(cellValue)) { 
-        const formattedPrice = parseFloat(cellValue).toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
-        pricesHtml += `<strong style="color: green;">${formattedPrice}</strong><br>`; 
+      if (colNum === 4 && !isNaN(cellValue)) { 
+        unitPrice = parseFloat(cellValue);
       } else if (colNum === 5 && !isNaN(cellValue)) { 
-        const ivaPercentage = (cellValue * 100).toFixed(0);
-        pricesHtml += `<strong style="color: orange;">IVA ${ivaPercentage}%</strong><br>`; 
-      } else if (isBase64Image(cellValue)) {
-        rowHtml += `<img src="${cellValue}" width="100" class="mb-2"/>`;
-      } else {
-        rowHtml += `${cellValue} `;
+        iva = parseFloat(cellValue);
+      } else if (colNum !== 4 && colNum !== 5) { 
+        if (isBase64Image(cellValue)) {
+          rowHtml += `<img src="${cellValue}" width="100" class="mb-2"/>`;
+        } else {
+          rowHtml += `${cellValue} `;
+        }
       }
+    }
+
+    if (unitPrice !== null && iva !== null) {
+      const finalPrice = unitPrice + (unitPrice * iva);
+      const formattedFinalPrice = finalPrice.toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
+      pricesHtml += `<strong style="color: green;">${formattedFinalPrice}</strong><br>`;
     }
 
     pricesHtml += '</div>';
@@ -129,9 +138,8 @@ function createCardsFromExcel(sheet, data) {
 </div>`;
 
     cardCount++;
-
     if (cardCount % 3 === 0) { 
-      rowHtml += '</div><div class="row">';
+      rowHtml += '</div><div class="row">'; 
     }
   }
 
@@ -144,7 +152,9 @@ function createCardsFromExcel(sheet, data) {
       cardText.classList.toggle('expanded');
       button.textContent = cardText.classList.contains('expanded') ? 'Leer menos' : 'Leer más';
     });
-  });
-}window.onload = function() {
+  }); 
+}
+
+window.onload = function() {
   handleExcelLoad();
 };
