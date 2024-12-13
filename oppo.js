@@ -1,6 +1,5 @@
 let workbookGlobal;
 
-
 function handleExcelLoad() {
   const uploadExcel = document.getElementById('uploadExcel');
   const sheetSelector = document.getElementById('sheetSelector');
