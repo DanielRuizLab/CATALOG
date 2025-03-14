@@ -5,7 +5,7 @@ function handleExcelLoad() {
   const sheetSelector = document.getElementById('sheetSelector');
   uploadExcel.style.display = 'inline-block';
  
-  const fileName = 'Datexce/Catálogo actualizado 02 de dic 2024 - OPPO.xlsx';
+  const fileName = 'Datexce/Catálogo actualizado 13 de Marzo - OPPO.xlsx';
   
   fetch(fileName)
     .then(response => { 

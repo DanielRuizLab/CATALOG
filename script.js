@@ -6,7 +6,7 @@ function handleExcelLoad() {
 
   uploadExcel.style.display = 'inline-block';
   
-  fetch('Datexce/Catálogo actualizado 13 de ene 2025.xlsx')
+  fetch('Datexce/Catálogo actualizado 13 de Marzo.xlsx')
     .then(response => {
       if (!response.ok) throw new Error('Error al cargar el archivo');
       return response.arrayBuffer();
@@ -15,6 +15,7 @@ function handleExcelLoad() {
       const workbook = XLSX.read(data, { type: 'array' });
       workbookGlobal = workbook;
 
+     
       sheetSelector.style.display = 'inline-block';
       sheetSelector.innerHTML = '<option value="">Selecciona una Categoria</option>';
       workbook.SheetNames.forEach(function (sheetName, index) {
