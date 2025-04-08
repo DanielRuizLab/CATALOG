@@ -5,7 +5,7 @@ function handleExcelLoad() {
   const sheetSelector = document.getElementById('sheetSelector');
   uploadExcel.style.display = 'inline-block';
  
-  const fileName = 'Datexce/Catálogo actualizado 02 de dic 2024 - OPPO.xlsx';
+  const fileName = 'Datexce/Catálogo actualizado 13 de Marzo - OPPO.xlsx';
   
   fetch(fileName)
     .then(response => { 
@@ -39,7 +39,6 @@ document.getElementById('uploadExcel').addEventListener('change', (event) => {
       console.log(`Archivo seleccionado: ${file.name}`);
   }
 });
-
 
 function handleFile(e) {
   const file = e.target.files[0];
@@ -93,7 +92,7 @@ function createCardsFromExcel(sheet, data) {
     const productValue = productName ? productName.v : 'Sin nombre'; 
 
     const imageName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 7 })]; 
-    const imageUrl = imageName ? `img/${imageName.v}` : 'https://via.placeholder.com/150';  
+    const imageUrl = imageName ? `img/imgoppo/${imageName.v}` : 'https://via.placeholder.com/150';  
 
     rowHtml += `  
       <div class="col-12 col-sm-6 col-md-4 mb-4"> 
