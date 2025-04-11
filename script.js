@@ -125,8 +125,11 @@ function createCardsFromExcel(sheet, data) {
 
     if (unitPrice !== null && iva !== null) {
       const finalPrice = unitPrice + (unitPrice * iva);
-      const formattedFinalPrice = finalPrice.toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
-      pricesHtml += `<strong style="color: green;">${formattedFinalPrice}</strong><br>`;
+      const formattedFinalPrice = finalPrice.toLocaleString('es-CO', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+      pricesHtml += `<strong style="color: green;">$${formattedFinalPrice}</strong><br>`;
     }
 
     pricesHtml += '</div>';

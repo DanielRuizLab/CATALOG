@@ -104,6 +104,9 @@ function createCardsFromExcel(sheet, data) {
     `; 
 
     let pricesHtml = '<div style="line-height: 1.5;">';
+    let unitPrice = null;
+    let iva = null;
+
     for (let colNum = 1; colNum <= data.e.c; colNum++) {
       const cellAddress = XLSX.utils.encode_cell({ r: rowNum, c: colNum });
       const cell = sheet[cellAddress];
@@ -124,8 +127,8 @@ function createCardsFromExcel(sheet, data) {
 
     if (unitPrice !== null && iva !== null) {
       const finalPrice = unitPrice + (unitPrice * iva);
-      const formattedFinalPrice = finalPrice.toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
-      pricesHtml += `<strong style="color: green;">${formattedFinalPrice}</strong><br>`;
+      const formattedFinalPrice = Math.round(finalPrice).toLocaleString('es-CO'); // Formatear con separadores de miles
+      pricesHtml += `<strong style="color: green;">$${formattedFinalPrice}</strong><br>`;
     }
 
     pricesHtml += '</div>';
@@ -138,8 +141,7 @@ function createCardsFromExcel(sheet, data) {
 
     cardCount++;
 
-   
-    if (cardCount % 3=== 0) {   
+    if (cardCount % 3 === 0) {   
       rowHtml += '</div><div class="row">'; 
     }
   }
