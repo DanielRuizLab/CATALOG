@@ -6,7 +6,7 @@ function handleExcelLoad() {
 
   uploadExcel.style.display = 'inline-block';
   
-  fetch('Datexce/Catálogo actualizado 3 de Abril_25.xlsx')
+  fetch('Datexce/Catálogo actualizado 14  de Abril_25.xlsx')
     .then(response => {
       if (!response.ok) throw new Error('Error al cargar el archivo');
       return response.arrayBuffer();
@@ -95,7 +95,7 @@ function createCardsFromExcel(sheet, data) {
     rowHtml += `  
       <div class="col-lg-4 col-md-6 col-sm-12 mt-3">
         <div class="card" style="width: 18rem;">
-          <img src="${imageUrl}" class="card-img-top" alt="Imagen de producto">
+          <img src="${imageUrl}" class="card-img-top" alt="Imagen de producto" onerror="this.onerror=null;this.src='https://via.placeholder.com/150';">
           <div class="card-body">
             <h5 class="card-title">${productValue}</h5>
             <p class="card-text" id="cardText${rowNum}">
