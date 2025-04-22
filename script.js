@@ -159,5 +159,6 @@ function createCardsFromExcel(sheet, data) {
 }
 
 window.onload = function() {
+  alert("⚠️ Los productos están sujetos a cambio de referencias y precios.");
   handleExcelLoad();
 };
