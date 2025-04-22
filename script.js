@@ -6,7 +6,7 @@ function handleExcelLoad() {
 
   uploadExcel.style.display = 'inline-block';
   
-  fetch('Datexce/Catálogo actualizado 14  de Abril_25.xlsx')
+  fetch('Datexce/Catálogo actualizado 21 de Abril_25.xlsx')
     .then(response => {
       if (!response.ok) throw new Error('Error al cargar el archivo');
       return response.arrayBuffer();
@@ -87,7 +87,7 @@ function createCardsFromExcel(sheet, data) {
 
   for (let rowNum = data.s.r + 1; rowNum <= data.e.r; rowNum++) { 
     const productName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 1 })]; 
-    const productValue = productName ? productName.v : 'Sin nombre'; 
+    const productValue = productName ? productName.v : 'Sin nombre';
 
     const imageName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 7 })];
     const imageUrl = imageName ? `img/${imageName.v}` : 'https://via.placeholder.com/150'; 
