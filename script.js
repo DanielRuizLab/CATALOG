@@ -6,7 +6,7 @@ function handleExcelLoad() {
 
   uploadExcel.style.display = 'inline-block';
   
-  fetch('Datexce/Catálogo actualizado 21 de Abril_25.xlsx')
+  fetch('Datexce/Catálogo actualizado 25 de Abril.xlsx')
     .then(response => {
       if (!response.ok) throw new Error('Error al cargar el archivo');
       return response.arrayBuffer();
@@ -159,6 +159,6 @@ function createCardsFromExcel(sheet, data) {
 }
 
 window.onload = function() {
-  alert("⚠️ Los productos están sujetos a cambio de referencias y precios.⚠️");
+  alert("⚠️😁 Los productos están sujetos a cambio de referencias y precios.⚠️");
   handleExcelLoad();
 };
