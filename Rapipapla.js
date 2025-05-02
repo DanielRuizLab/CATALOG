@@ -1,39 +1,30 @@
 let workbookGlobal;
 
 function handleExcelLoad() {
-  const uploadExcel = document.getElementById('uploadExcel');
-  const sheetSelector = document.getElementById('sheetSelector');
-  uploadExcel.style.display = 'inline-block';
- 
   const fileName = 'Datexce/Catálogo prueba.xlsx';
   
   fetch(fileName)
     .then(response => { 
-      if (!response.ok) throw new Error('El archivo JSON no está disponible o tiene un formato incorrecto');
+      if (!response.ok) throw new Error('El archivo Excel no está disponible o tiene un formato incorrecto');
       return response.arrayBuffer();
     })
     .then(data => {    
       const workbook = XLSX.read(data, { type: 'array' });
       console.log(`El archivo ${fileName} fue cargado correctamente`);
 
-
       workbookGlobal = workbook;
-      sheetSelector.style.display = 'inline-block';
-      sheetSelector.innerHTML = '<option value="">Selecciona un Producto</option>';
-      workbook.SheetNames.forEach(function (sheetName, index) {
-        if (sheetName.toUpperCase() === 'CATALOGO') return;
-        const option = document.createElement('option');
-        option.value = index;
-        option.text = sheetName;
-        sheetSelector.appendChild(option);
-      });
+
+      const firstSheetName = workbook.SheetNames.find(name => name.toUpperCase() !== 'CATALOGO');
+      if (firstSheetName) {
+        const sheet = workbook.Sheets[firstSheetName];
+        const range = XLSX.utils.decode_range(sheet['!ref']);
+        createCardsFromExcel(sheet, range);
+      }
     })
     .catch(error => {
       console.error('Error al cargar el archivo:', error);
-     
     });
 }
-
 document.getElementById('uploadExcel').addEventListener('change', (event) => {
   const file = event.target.files[0];
   if (file) {
