@@ -21,6 +21,7 @@ function handleExcelLoad() {
       sheetSelector.style.display = 'inline-block';
       sheetSelector.innerHTML = '<option value="">Selecciona un Producto</option>';
       workbook.SheetNames.forEach(function (sheetName, index) {
+        if (sheetName.toUpperCase() === 'CATALOGO') return;
         const option = document.createElement('option');
         option.value = index;
         option.text = sheetName;

@@ -18,6 +18,7 @@ function handleExcelLoad() {
       sheetSelector.style.display = 'inline-block';
       sheetSelector.innerHTML = '<option value="">Selecciona una Categoria</option>';
       workbook.SheetNames.forEach(function (sheetName, index) {
+        if (sheetName.toUpperCase() === 'CATALOGO') return;
         const option = document.createElement('option');
         option.value = index;
         option.text = sheetName;
@@ -52,6 +53,7 @@ function handleFile(e) {
     sheetSelector.style.display = 'inline-block';
     sheetSelector.innerHTML = '<option value="">Selecciona una Categoria</option>';
     workbook.SheetNames.forEach(function (sheetName, index) {
+       if (sheetName.toUpperCase() === 'CATALOGO') return;
       const option = document.createElement('option');
       option.value = index;
       option.text = sheetName;
