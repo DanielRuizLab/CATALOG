@@ -85,7 +85,7 @@ function createCardsFromExcel(sheet, data) {
     const productValue = productName ? productName.v : 'Sin nombre'; 
 
     const imageName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 7 })]; 
-    const imageUrl = imageName ? `img/imgoppo/${imageName.v}` : 'https://via.placeholder.com/150';  
+    const imageUrl = imageName ? `img/following/${imageName.v}` : 'https://via.placeholder.com/150';  
 
     rowHtml += `  
       <div class="col-12 col-sm-6 col-md-4 mb-4"> 
@@ -113,7 +113,6 @@ function createCardsFromExcel(sheet, data) {
         if (isBase64Image(cellValue)) {
           rowHtml += `<img src="${cellValue}" width="100" class="mb-2"/>`;
         } else {
-          // Eliminar texto que contenga nombres de archivos de imagen (.jpg, .png, etc.)
           const cleanText = typeof cellValue === 'string'
             ? cellValue.replace(/\s*\/?\s*[\w\s-]+\.(jpg|jpeg|png|webp)/gi, '') 
             : cellValue;
@@ -138,7 +137,7 @@ function createCardsFromExcel(sheet, data) {
 
     cardCount++;
 
-    if (cardCount % 3 === 0) {   
+    if (cardCount % 3 === 0) {
       rowHtml += '</div><div class="row">'; 
     }
   }
