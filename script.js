@@ -6,7 +6,7 @@ function handleExcelLoad() {
 
   uploadExcel.style.display = 'inline-block';
   
-  fetch('Datexce/10_Junio_2025_actualizacion.xlsx')
+  fetch('Datexce/Catálogo actualizado  10  DE JUNIO.xlsx')
     .then(response => {
       if (!response.ok) throw new Error('Error al cargar el archivo');
       return response.arrayBuffer();
@@ -92,7 +92,15 @@ function createCardsFromExcel(sheet, data) {
     const productValue = productName ? productName.v : 'Sin nombre';
 
     const imageName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 7 })];
-    const imageUrl = imageName ? `img/${imageName.v}` : 'https://via.placeholder.com/150'; 
+    let imageUrl = imageName ? `img/${imageName.v}` : 'https://via.placeholder.com/150';
+
+    // Limpiar el nombre de la imagen si existe
+    if (imageName && imageName.v) {
+      const cleanName = imageName.v
+        .replace(/\s+/g, '_')           // Reemplaza espacios por guiones bajos
+        .replace(/[^\w.-]/g, '');       // Elimina caracteres no válidos
+      imageUrl = `img/${cleanName}`;
+    }
 
     rowHtml += `  
       <div class="col-lg-4 col-md-6 col-sm-12 mt-3">
