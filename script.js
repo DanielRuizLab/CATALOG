@@ -92,7 +92,20 @@ function createCardsFromExcel(sheet, data) {
     const productValue = productName ? productName.v : 'Sin nombre';
 
     const imageName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 7 })];
-    const imageUrl = imageName ? `img/${imageName.v}` : 'https://via.placeholder.com/150'; 
+    let imageUrl = imageName ? `img/${imageName.v}` : 'https://via.placeholder.com/150';
+
+    // Limpiar el nombre de la imagen si existe
+    if (imageName && imageName.v) {
+      const cleanName = imageName.v
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '_')      // Espacios por guión bajo
+        .replace(/[áéíóúñ]/g, c => ({
+          'á':'a','é':'e','í':'i','ó':'o','ú':'u','ñ':'n'
+        }[c]))                    // Quita tildes y ñ
+        .replace(/[^\w.-]/g, ''); // Elimina caracteres no válidos
+      imageUrl = `img/${cleanName}`;
+    }
 
     rowHtml += `  
       <div class="col-lg-4 col-md-6 col-sm-12 mt-3">
