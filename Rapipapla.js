@@ -85,7 +85,7 @@ function createCardsFromExcel(sheet, data) {
     const productValue = productName ? productName.v : 'Sin nombre'; 
 
     const imageName = sheet[XLSX.utils.encode_cell({ r: rowNum, c: 7 })]; 
-    const imageUrl = imageName ? `img/following/${imageName.v}` : 'https://via.placeholder.com/150';  
+    const imageUrl = imageName ? `img/imgfoll/${imageName.v}` : 'https://via.placeholder.com/150';  
 
     rowHtml += `  
       <div class="col-12 col-sm-6 col-md-4 mb-4"> 
